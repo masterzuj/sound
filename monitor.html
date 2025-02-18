@@ -19,8 +19,7 @@
       let startButton = createButton('Start Microphone');
       startButton.mousePressed(startMic);
 
-      // Slider for rate control
-      //rateSlider = createSlider(0.5, 2.0, 1.0, 0.1); // Min, Max, Default, Step
+      
     }
 
     function draw() {
@@ -34,14 +33,13 @@
         filter.disconnect();
         filter.connect();
 
-        // Get rate from slider
-       // rate = rateSlider.value();
+       
 
         // Apply rate to the output (indirectly, by creating a new sound)
         let sound; // = new p5.SoundOut(); // Create a new SoundOut each frame
 
         mic.connect(sound); // Connect mic to SoundOut
-        //sound.rate(1); // Set the rate
+        
         sound.connect(); // Connect SoundOut to destination
 
         ellipse(width / 2, height / 2, level * 100, level * 100);
