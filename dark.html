@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Audio Recorder</title>
+    <style>
+        canvas {
+            position: absolute;
+            left: 400px;
+            top: 50px;
+        }
+        #controls {
+            position: absolute;
+            left: 400px;
+            top: 0px;
+        }
+        #controls div {
+            color: blue;
+            margin-bottom: 5px;
+        }
+    </style>
+    <script src="./p5.js"></script>
+    <script src="./p5.sound.js"></script>
+</head>
+<body>
+
+<div id="controls">
+    <div id="div_desc"> CLICK TO START RECORDING</div>
+    <div id="div_record" style="display: none;">⏺ RECORDING... CLICK TO STOP</div>
+    <div id="div_stop" style="display: none;">⏹ STOPPED. CLICK TO PLAY</div>
+    <div id="div_play" style="display: none;">► PLAYING... CLICK TO SAVE</div>
+    <div id="div_save" style="display: none;"> SAVED! CLICK TO RELOAD <button onclick="window.location.reload()">↻</button></div>
+</div>
+
+<script>
+    let mic, recorder, soundFile, fft;
+    let state = 0;
+    let uniqueId;
+    let recordingTimeout;
+
+    function setup() {
+        createCanvas(400, 400);
+        fft = new p5.FFT();
+
+        mic = new p5.AudioIn();
+
+        mic.start(function() { // Mikrofon-Zugriff anfordern
+            console.log('Mikrofon-Zugriff gewährt!');
+        }, function(err) {
+            console.error('Fehler beim Abrufen des Mikrofon-Zugriffs:', err);
+        });
+
+        recorder = new p5.SoundRecorder();
+        recorder.setInput(mic);
+        soundFile = new p5.SoundFile();
+
+        updateControls();
+    }
+
+    function mousePressed() {
+        switch (state) {
+            case 0: // Aufnahme starten
+                if (mic.getLevel() > 0) { // Überprüfen, ob Mikrofon aktiv ist
+                    soundFile = new p5.SoundFile(); // Neues SoundFile für jede Aufnahme
+                    recorder.record(soundFile);
+                    state = 1;
+
+                    recordingTimeout = setTimeout(() => {
+                        if (state === 1) {
+                            stopRecording();
+                        }
+                    }, 10000);
+                } else {
+                    console.log("Mikrofon ist noch nicht aktiv. Bitte Zugriff erlauben.");
+                }
+                break;
+            case 1: // Aufnahme stoppen
+                stopRecording();
+                break;
+            case 2: // Abspielen
+				
+				soundFile.rate(0.7);
+                if (soundFile && soundFile.isLoaded()) { // Überprüfen, ob SoundFile geladen ist
+                    soundFile.play();
+                    state = 0; //3;
+                }
+                break;
+            case 3: // Speichern
+                uniqueId = Math.random().toString(36).substring(2, 15);
+                //save(soundFile, uniqueId + 'Sound.wav');
+                state = 4;
+                break;
+            case 4: // Neu laden
+                state = 0;
+                window.location.reload();
+                break;
+        }
+        updateControls();
+    }
+
+    function stopRecording() {
+        recorder.stop();
+        clearTimeout(recordingTimeout);
+        state = 2;
+    }
+
+    function updateControls() {
+        let divs = ['div_desc', 'div_record', 'div_stop', 'div_play', 'div_save'];
+        divs.forEach((id, index) => {
+            let div = select('#' + id);
+            if (index === state) {
+                div.show();
+            } else {
+                div.hide();
+            }
+        });
+    }
+
+    function draw() {
+        background(220);
+
+        if (mic.getLevel() > 0) { // Verwenden Sie mic.getLevel()
+            let waveform = fft.waveform();
+
+            beginShape();
+            for (let i = 0; i < waveform.length; i++) {
+                let x = map(i, 0, waveform.length, 0, width);
+                let y = map(waveform[i], -1, 1, height, 0);
+                vertex(x, y);
+            }
+            endShape();
+        }
+    }
+</script>
+
+</body>
+</html>
