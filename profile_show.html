@@ -1,0 +1,70 @@
+<meta charset="utf-8">
+
+<script src="./p5.js"></script>  
+<script src="./p5.sound.js"></script>
+
+<script>
+	let mic, recorder, soundFile;
+	
+	
+	function setup() {
+		
+		audioContext = getAudioContext();
+		
+		fft = new p5.FFT();
+		
+		
+		
+		
+  createCanvas(400, 400);
+  mic = new p5.AudioIn();
+  mic.start();
+  recorder = new p5.SoundRecorder();
+  recorder.setInput(mic);
+  //soundFile = new p5.SoundFile();
+		fft = new p5.FFT();
+  		fft.setInput(mic);
+		
+		StartAudio();
+}
+	function draw() {
+		  background(220);
+				
+		let waveform1 = fft.waveform();
+		
+
+  beginShape();
+		
+		stroke("blue");
+		
+  for (let i = 0; i < waveform1.length; i++) {
+    let x = map(i, 0, waveform1.length, 0, width);
+    let y = map(waveform1[i], -1, 1, height, 0);
+    vertex(x, y);
+  }
+ 
+		
+		let spectrum = fft.analyze();
+		
+	for (let i = 0; i < spectrum.length; i++) {
+      let x = map(i, 0, spectrum.length, 0, width);
+      let h = -height + map(spectrum[i], 0, 255, height, 0);
+      fill(255);
+      rect(x, height, width / spectrum.length, h);
+    }
+		
+ 	endShape();
+		
+}
+	
+	
+function StartAudio() { // Or any other user event
+  userStartAudio(); // This will create/resume the AudioContext if needed
+  
+}
+	
+	
+</script>
+
+
+
