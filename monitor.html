@@ -10,7 +10,7 @@
     let rate = 1.0; // Initial playback rate
 
     function setup() {
-      createCanvas(400, 200);
+     // createCanvas(400, 200);
       audioContext = getAudioContext();
 
       mic = new p5.AudioIn();
@@ -42,7 +42,7 @@
         
         sound.connect(); // Connect SoundOut to destination
 
-        ellipse(width / 2, height / 2, level * 100, level * 100);
+        //ellipse(width / 2, height / 2, level * 100, level * 100);
       }
     }
 
